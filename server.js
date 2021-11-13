@@ -22,7 +22,7 @@ function init() {
         ]
     })
     .then((data) => {
-        switch(data) {
+        switch(data.choice) {
             case 'View all departments':
                 viewAllDepartments();
                 break;
@@ -49,3 +49,35 @@ function init() {
         }
     })
 }
+
+function viewAllDepartments() {
+    return;
+}
+
+function viewAllRoles() {
+    return;
+}
+
+function viewAllEmployees() {
+    return;
+}
+
+function addDepartment() {
+    return;
+}
+
+function addRole() {
+    return;
+}
+
+function addEmployee() {
+    return;
+}
+
+function updateEmployeeRole() {
+    return;
+}
+
+
+// APP starts here
+init();
