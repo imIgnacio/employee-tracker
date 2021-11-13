@@ -17,10 +17,35 @@ function init() {
             'Add a department',
             'Add a role',
             'Add an employee',
-            'Update an employee role'
+            'Update employee role',
+            'Exit'
         ]
     })
     .then((data) => {
-         runFunction(data);
+        switch(data) {
+            case 'View all departments':
+                viewAllDepartments();
+                break;
+            case 'View all roles':
+                viewAllRoles();
+                break;
+            case 'View all employees':
+                viewAllEmployees();
+                break;
+            case 'Add a department':
+                addDepartment();
+                break;
+            case 'Add a role':
+                addRole();
+                break;
+            case 'Add an employee':
+                addEmployee();
+                break;
+            case 'Update employee role':
+                updateEmployeeRole();
+                break;
+            default:
+                return;
+        }
     })
 }
