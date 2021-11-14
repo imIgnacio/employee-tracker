@@ -16,58 +16,14 @@ const db = mysql.createConnection(
 // Function to init app  
 function init() {
     console.log("Welcome to Employee Tracker V1.0.0");
-    
-    inquirer
-    .prompt({
-        type: 'list',
-        message: 'Please select one of the following choices',
-        name: 'choice',
-        choices: [
-            'View all departments',
-            'View all roles',
-            'View all employees',
-            'Add a department',
-            'Add a role',
-            'Add an employee',
-            'Update employee role',
-            'Exit'
-        ]
-    })
-    .then((data) => {
-        switch(data.choice) {
-            case 'View all departments':
-                viewAllDepartments();
-                break;
-            case 'View all roles':
-                viewAllRoles();
-                break;
-            case 'View all employees':
-                viewAllEmployees();
-                break;
-            case 'Add a department':
-                addDepartment();
-                break;
-            case 'Add a role':
-                addRole();
-                break;
-            case 'Add an employee':
-                addEmployee();
-                break;
-            case 'Update employee role':
-                updateEmployeeRole();
-                break;
-            default:
-                return;
-        }
-    })
-    return;
+    renderOptions();
 }
 
 function viewAllDepartments() {
     db.query('SELECT * FROM department', function(err,results){
         if (err) throw err;
         console.table(results);
-        return;
+        renderOptions();
     });
 }
 
@@ -75,7 +31,7 @@ function viewAllRoles() {
     db.query('SELECT * FROM role', function(err,results){
         if (err) throw err;
         console.table(results);
-        return;
+        renderOptions();
     });
 }
 
@@ -83,7 +39,7 @@ function viewAllEmployees() {
     db.query('SELECT * FROM employee', function(err,results){
         if (err) throw err;
         console.table(results);
-        return;
+        renderOptions();
     });
 }
 
@@ -102,8 +58,8 @@ function addDepartment() {
             console.log(`${data.addDepartment} added to departments`);
             viewAllDepartments();
         }); 
+        renderOptions();
     });
-    return;
 }
 
 function addRole() {
@@ -147,8 +103,8 @@ function addRole() {
                 });
             });
         });
+        renderOptions();
     });
-    return;
 }
 
 function addEmployee() {
@@ -199,20 +155,119 @@ function addEmployee() {
                 let managerID = employeeArray.indexOf(data.managerID) + 1;
                 let roleID = roleArray.indexOf(data.role) + 1;
                 let qry = "INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES( ?, ?, ?, ?)";
-                db.query(qry, [data.firstName, data.lastName, roleID, managerID],
-                    (err, results) => {
-                        if (err) throw err;
-                        console.log("Employee added successfully");
-                        viewAllEmployees();
-                    });
+                db.query(qry, [data.firstName, data.lastName, roleID, managerID], (err, results) => {
+                    if (err) throw err;
+                    console.log("Employee added successfully");
+                    viewAllEmployees();
+                });
+                renderOptions();
             });
         });
     });
-    return;
 }
 
 function updateEmployeeRole() {
-    return;
+    let empNameArray =[];
+    let qry = "SELECT * FROM employee";
+    db.query(qry, (err, results) => {
+        if(err) throw err;
+        inquirer.prompt([
+            {
+                name:"employeeName",
+                type:"list",
+                message: "Which employee would you like to update",
+                choices: function(){
+                    for(let i=0; i < results.length; i++){
+                        empNameArray.push(results[i].id + "." + results[i].first_name + " " + results[i].last_name);
+                    }
+                    return empNameArray;
+                }, 
+            },
+        ])
+        .then((answer) => {
+            let employeeID = empNameArray.indexOf(answer.employeeName) + 1;
+            changeRole(employeeID);
+        });
+    });
+}
+
+function changeRole(employeeID) {
+    let roleArray2 = [];
+    let queryRole = "SELECT * FROM role";
+    db.query(queryRole, (err, results2) => {
+        if(err) throw err;
+        inquirer.prompt([
+            {
+                name:"role",
+                type:"list",
+                message: "What is the employee's new Role",
+                choices: function(){
+                    for(let j=0; j< results2.length; j++){
+                        roleArray2.push(results2[j].title);
+                    }
+                    return roleArray2;
+                },  
+            },
+        ])
+        .then((data) => {
+            let newRole = data.role;
+            let roleID = roleArray2.indexOf(newRole) + 1;
+            let qry = "UPDATE employee SET role_id = ? WHERE employee.id = ?";
+            db.query(qry, [roleID, employeeID], (err, results) => {
+                if(err) throw err;
+                console.log("Employee Role Updated");
+                console.table(results);
+                viewAllEmployees();
+                renderOptions();
+            });
+        });
+    });
+}
+
+function renderOptions() {
+    inquirer
+    .prompt({
+        type: 'list',
+        message: 'Please select one of the following choices',
+        name: 'choice',
+        choices: [
+            'View all departments',
+            'View all roles',
+            'View all employees',
+            'Add a department',
+            'Add a role',
+            'Add an employee',
+            'Update employee role',
+            'Exit'
+        ]
+    })
+    .then((data) => {
+        switch(data.choice) {
+            case 'View all departments':
+                viewAllDepartments();
+                break;
+            case 'View all roles':
+                viewAllRoles();
+                break;
+            case 'View all employees':
+                viewAllEmployees();
+                break;
+            case 'Add a department':
+                addDepartment();
+                break;
+            case 'Add a role':
+                addRole();
+                break;
+            case 'Add an employee':
+                addEmployee();
+                break;
+            case 'Update employee role':
+                updateEmployeeRole();
+                break;
+            default:
+                process.exit(0);
+        }
+    })
 }
 
 
