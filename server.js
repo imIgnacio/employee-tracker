@@ -270,6 +270,5 @@ function renderOptions() {
     })
 }
 
-
 // APP starts here
 init();
