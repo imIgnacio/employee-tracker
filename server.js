@@ -60,6 +60,7 @@ function init() {
                 return;
         }
     })
+    return;
 }
 
 function viewAllDepartments() {
@@ -151,6 +152,62 @@ function addRole() {
 }
 
 function addEmployee() {
+    let roleArray = [];
+    let employeeArray = [];
+    let queryRole = 'SELECT * FROM role';
+
+    db.query(queryRole, (err, results) => {
+        if (err) throw err;
+        let queryEmployee = 'SELECT * FROM employee';
+        db.query(queryEmployee, (err, resultsE) => {
+            if (err) throw err;
+            inquirer.prompt([
+                {
+                    name:"firstName",
+                    type:"input",
+                    message: "Enter the first name of employee",
+                },
+                {
+                    name:"lastName",
+                    type:"input",
+                    message: "Enter the last name of employee",
+                },
+                {
+                    name:"role",
+                    type:"list",
+                    message: "What is the employee's Role",
+                    choices: function(){
+                        for(let i=0; i< results.length; i++){
+                            roleArray.push(results[i].title)
+                        }
+                        return roleArray;
+                    },
+                },
+                {
+                    name:"managerID",
+                    type:"list",
+                    message: "Who is the employee's Manager ?",
+                    choices: function(){
+                        for(let j=0; j< resultsE.length; j++){
+                            employeeArray.push(resultsE[j].first_name)
+                        }
+                        return employeeArray;
+                    },
+                },
+            ])
+            .then((data) => {
+                let managerID = employeeArray.indexOf(data.managerID) + 1;
+                let roleID = roleArray.indexOf(data.role) + 1;
+                let qry = "INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES( ?, ?, ?, ?)";
+                db.query(qry, [data.firstName, data.lastName, roleID, managerID],
+                    (err, results) => {
+                        if (err) throw err;
+                        console.log("Employee added successfully");
+                        viewAllEmployees();
+                    });
+            });
+        });
+    });
     return;
 }
 
