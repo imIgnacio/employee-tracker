@@ -51,19 +51,19 @@ function addDepartment() {
             type: "input",
             message: "What department would you like to add?",
         }
-    ]).then(data => {
+    ]).then((data) => {
         let query = "INSERT INTO department (name) VALUES (?)";
         db.query(query, data.addDepartment, (err, result) => {
             if (err) throw err;
             console.log(`${data.addDepartment} added to departments`);
-            viewAllDepartments();
-        }); 
+        });
         renderOptions();
     });
 }
 
 function addRole() {
-    inquirer.prompt([
+    inquirer
+    .prompt([
         {
             type: 'input',
             name: 'role',
@@ -74,36 +74,37 @@ function addRole() {
             name: 'salary',
             message: "What is the salary of this role?",
         }       
-    ]).then(answer => {
+    ])
+    .then((answer) => {
         const parms = [answer.role, answer.salary];
 
         //Get department from department table
         const roleSel = `SELECT name, id FROM department`;
-        db.query(roleSel, function(err, data){
-            if(err) throw err;
-            const department = data.map(({name, id}) => ({name: name, value: id}));
+        db.query(roleSel, (err, data) => {
+                if (err) throw err;
+                const department = data.map(({ name, id }) => ({ name: name, value: id }));
 
-            inquirer.prompt([
-                {
-                    type: 'list',
-                    name: 'department',
-                    message: "What department would you like to add of this role ?",
-                    choices: department
-                }
-            ]).then(departmentChoice => {
-                const department = departmentChoice.department; //add the value of new department in department
-                parms.push(department); //adding role , salary in department
+                inquirer.prompt([
+                    {
+                        type: 'list',
+                        name: 'department',
+                        message: "What department would you like to add of this role ?",
+                        choices: department
+                    }
+                ]).then((departmentChoice) => {
+                    const department = departmentChoice.department; //add the value of new department in department
+                    parms.push(department); //adding role , salary in department
 
-                const sql = 'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)';
+                    const sql = 'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)';
 
-                db.query(sql, parms, (err, result) => {
-                    if(err) throw err;
-                    console.log(`Added New role to roles!`);
-                    viewAllRoles();
+                    db.query(sql, parms, (err, result) => {
+                        if (err)
+                            throw err;
+                        console.log(`Added New role to roles!`);
+                    });
+                    renderOptions();
                 });
             });
-        });
-        renderOptions();
     });
 }
 
@@ -158,7 +159,6 @@ function addEmployee() {
                 db.query(qry, [data.firstName, data.lastName, roleID, managerID], (err, results) => {
                     if (err) throw err;
                     console.log("Employee added successfully");
-                    viewAllEmployees();
                 });
                 renderOptions();
             });
@@ -217,7 +217,6 @@ function changeRole(employeeID) {
                 if(err) throw err;
                 console.log("Employee Role Updated");
                 console.table(results);
-                viewAllEmployees();
                 renderOptions();
             });
         });
